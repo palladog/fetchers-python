@@ -168,19 +168,14 @@ class SWE_FHMFetcher(BaseEpidemiologyFetcher):
             goteborg_count = 0
             stockholm_count = 0
 
-            # day = (today - timedelta(days=days)).isoformat()
             day = today - timedelta(days=days) # The date of days since today
             data = self.fetch(day)
             features = data.get('features')
             #time.sleep(2)
 
-            # WHEN ON SUNDAY IS THE DATA POSTED?
-            # After the fetcher runs? -> keep the fetcher as is
-            # Before the fetcher?  -> change the fetcher so that Sunday (and not the one the week before)
-            two_weeks_ago = day - timedelta(days=14) # CHANGE TO 14
-            last_last_sunday = two_weeks_ago - timedelta(days=two_weeks_ago.weekday()) + timedelta(days=6)
+            next_sunday = datetime.strptime(day.strftime('%Y-%W') + '-0', '%Y-%W-%w')
 
-            upsert_date = last_last_sunday
+            upsert_date = next_sunday
 
             if len(features) == 0:
                 logger.debug('There is no new data for this week')
