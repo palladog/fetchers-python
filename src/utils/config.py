@@ -14,6 +14,13 @@
 
 import os
 
+# Set environmental variables
+os.environ['DB_ADDRESS'] = 'localhost'
+os.environ['DB_PORT'] = '5432'
+os.environ['DB_NAME'] = 'covid19database'
+os.environ['DB_USERNAME'] = 'postgres'
+os.environ['DB_PASSWORD'] = 'password'
+
 
 class Config:
     __instance = None

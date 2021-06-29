@@ -110,7 +110,7 @@ class PostgresqlHelper(AbstractAdapter):
     def get_adm_division(self, countrycode: str, adm_area_1: str = None, adm_area_2: str = None,
                          adm_area_3: str = None) -> Tuple:
         sql_query = sql.SQL("""
-            SELECT country, adm_area_1, adm_area_2, adm_area_3, gid from administrative_division
+            SELECT country, adm_area_1, adm_area_2, adm_area_3, gid from covid19_schema.administrative_division
             WHERE countrycode = %s
                 AND regexp_replace(COALESCE(adm_area_1, ''), '[^\w%%]+','','g')
                     ILIKE regexp_replace(%s, '[^\w%%]+','','g')
@@ -135,7 +135,7 @@ class PostgresqlHelper(AbstractAdapter):
         if 'msoa' in data_keys:
             target.append('msoa')
 
-        sql_query = sql.SQL("""INSERT INTO {table_name} ({insert_keys}) VALUES ({insert_data})
+        sql_query = sql.SQL("""INSERT INTO covid19_schema.{table_name} ({insert_keys}) VALUES ({insert_data})
                                 ON CONFLICT
                                     (""" + ",".join(target) + """)
                                 DO
@@ -224,7 +224,7 @@ class PostgresqlHelper(AbstractAdapter):
     def upsert_diagnostics(self, **kwargs):
         data_keys = ["validation_success", "error", "last_run_start", "last_run_stop", "first_timestamp",
                      "last_timestamp", "details"]
-        sql_query = sql.SQL("""INSERT INTO diagnostics ({insert_keys}) VALUES ({insert_data})
+        sql_query = sql.SQL("""INSERT INTO covid19_schema.diagnostics ({insert_keys}) VALUES ({insert_data})
                                         ON CONFLICT
                                             (table_name, source)
                                         DO
@@ -241,13 +241,13 @@ class PostgresqlHelper(AbstractAdapter):
         logger.debug("Updating diagnostics table with data: {}".format(list(kwargs.values())))
 
     def get_data(self, table_name: str, source: str, date: str, gid: str):
-        sql_str = """SELECT * FROM {table_name} WHERE source = %s AND date = %s AND gid = %s"""
+        sql_str = """SELECT * FROM covid19_schema.{table_name} WHERE source = %s AND date = %s AND gid = %s"""
         sql_query = sql.SQL(sql_str).format(table_name=sql.Identifier(table_name))
         result = self.execute(sql_query, (source, date, gid))
         return result[0] if len(result) == 1 else None
 
     def get_earliest_timestamp(self, table_name: str, source: str = None):
-        sql_str = """SELECT min(date) as date FROM {table_name}"""
+        sql_str = """SELECT min(date) as date FROM covid19_schema.{table_name}"""
         if source:
             sql_str = sql_str + """ WHERE source = %s"""
 
@@ -257,7 +257,7 @@ class PostgresqlHelper(AbstractAdapter):
         return result[0]['date'] if len(result) > 0 else None
 
     def get_latest_timestamp(self, table_name: str, source: str = None):
-        sql_str = """SELECT max(date) as date FROM {table_name}"""
+        sql_str = """SELECT max(date) as date FROM covid19_schema.{table_name}"""
         if source:
             sql_str = sql_str + """ WHERE source = %s"""
 
@@ -268,7 +268,7 @@ class PostgresqlHelper(AbstractAdapter):
 
     def get_details(self, table_name: str, source: str = None):
         sql_str = """SELECT country, min(date) as min_date, max(date) as max_date  
-                     FROM {table_name}"""
+                     FROM covid19_schema.{table_name}"""
         if source:
             sql_str = sql_str + """ WHERE source = %s"""
         sql_str = sql_str + " GROUP BY country"

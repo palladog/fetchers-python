@@ -259,7 +259,7 @@ class SqliteHelper(AbstractAdapter):
     def upsert_table_data(self, table_name: str, **kwargs):
         self.check_if_gid_exists(kwargs)
         kwargs = self.format_data(kwargs)
-        sql_query = """INSERT OR REPLACE INTO {table_name} ({insert_keys}) VALUES ({insert_data})""".format(
+        sql_query = """INSERT OR REPLACE INTO covid19_schema.{table_name} ({insert_keys}) VALUES ({insert_data})""".format(
             table_name=table_name,
             insert_keys=",".join([key for key in kwargs.keys()]),
             insert_data=",".join('?' * len(kwargs)),
@@ -280,7 +280,7 @@ class SqliteHelper(AbstractAdapter):
         self.upsert_table_data(table_name, **kwargs)
 
     def upsert_diagnostics(self, **kwargs):
-        sql_query = """INSERT OR REPLACE INTO diagnostics ({insert_keys}) VALUES ({insert_data})""".format(
+        sql_query = """INSERT OR REPLACE INTO covid19_schema.diagnostics ({insert_keys}) VALUES ({insert_data})""".format(
             insert_keys=",".join([key for key in kwargs.keys()]),
             insert_data=",".join('?' * len(kwargs)),
         )
@@ -288,7 +288,7 @@ class SqliteHelper(AbstractAdapter):
         logger.debug("Updating diagnostics table with data: {}".format(list(kwargs.values())))
 
     def get_earliest_timestamp(self, table_name: str, source: str = None):
-        sql_str = """SELECT min(date) as date FROM {table_name}"""
+        sql_str = """SELECT min(date) as date FROM covid19_schema.{table_name}"""
         if source:
             sql_str = sql_str + """ WHERE source = %s"""
 
@@ -298,7 +298,7 @@ class SqliteHelper(AbstractAdapter):
         return result[0]['date'] if len(result) > 0 else None
 
     def get_latest_timestamp(self, table_name: str, source: str = None):
-        sql_str = """SELECT max(date) as date FROM {table_name}"""
+        sql_str = """SELECT max(date) as date FROM covid19_schema.{table_name}"""
         if source:
             sql_str = sql_str + """ WHERE source = %s"""
 
